@@ -22,6 +22,8 @@ class AppModule {
         api: PokemonApi
     ) = PokemonNetworkDatasource(api)
 
+    @Singleton
+    @Provides
     fun providePokemonApi(): PokemonApi {
         return Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
             .baseUrl(BASE_URL).build().create(PokemonApi::class.java)

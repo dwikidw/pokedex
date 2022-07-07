@@ -1,5 +1,6 @@
 package com.example.pokedex.data.remote
 
+import com.example.pokedex.data.remote.response.AbilityPokemon
 import com.example.pokedex.data.remote.response.Pokemon
 import com.example.pokedex.data.remote.response.PokemonList
 import retrofit2.http.GET
@@ -7,7 +8,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface PokemonApi {
-    @GET
+    @GET("pokemon")
     suspend fun getPokemonList(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
@@ -17,4 +18,9 @@ interface PokemonApi {
     suspend fun getPokemon(
         @Path("name") name: String
     ): Pokemon
+
+    @GET("ability/{ability}")
+    suspend fun getPokemonAbility(
+        @Path("ability") ability: String
+    ): AbilityPokemon
 }

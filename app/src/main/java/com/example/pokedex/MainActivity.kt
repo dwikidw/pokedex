@@ -11,12 +11,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import com.example.pokedex.ui.home.PokemonListScreen
 import com.example.pokedex.ui.theme.PokedexTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), ImageLoaderFactory {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -29,20 +31,13 @@ class MainActivity : ComponentActivity() {
                         PokemonListScreen(navController = navController)
                     }
                     composable(
-                        route = "pokemon_detail/name/{color}",
+                        route = "pokemon_detail/{name}",
                         arguments = listOf(
-                            navArgument("color") {
-                                type = NavType.IntType
-                            },
                             navArgument("name") {
                                 type = NavType.StringType
                             }
                         )
                     ) {
-                        val colorArgs = remember {
-                            val color = it.arguments?.getInt("color")
-                            color?.let { Color(it) } ?: Color.White
-                        }
                         val nameArgs = remember {
                             val name = it.arguments?.getString("name")
                         }
@@ -50,5 +45,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
+            .crossfade(true)
+            .build()
     }
 }
