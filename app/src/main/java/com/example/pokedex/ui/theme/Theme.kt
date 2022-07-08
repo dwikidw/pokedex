@@ -16,11 +16,11 @@ private val DarkColorPalette = darkColors(
 )
 
 private val LightColorPalette = lightColors(
-    primary = Color.Blue,
+    primary = Color.Red,
     background = PurpleFade,
     onBackground = Color.Black,
     surface = Color.White,
-    onSurface = Color.Black
+    onSurface = Color.Black,
 )
 
 @Composable

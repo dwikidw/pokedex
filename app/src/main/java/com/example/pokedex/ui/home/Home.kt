@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -30,6 +31,7 @@ import com.example.pokedex.ui.widget.SearchBar
 import coil.decode.SvgDecoder
 import com.example.pokedex.data.model.PokemonAbilty
 import com.example.pokedex.data.model.PokemonItem
+import com.example.pokedex.ui.widget.FilterCheckBox
 import java.util.*
 
 
@@ -42,7 +44,6 @@ fun PokemonListScreen(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ) {
-        var searchFilter by remember { viewModel.searchFilter }
         var pokemon by remember { viewModel.pokemon }
 
         Column(
@@ -60,7 +61,7 @@ fun PokemonListScreen(
             SearchBar(
                 hint = "Search", modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(24.dp, 24.dp, 24.dp, 4.dp),
                 onType = {
                     viewModel.onSearching(it)
                 },
@@ -68,17 +69,7 @@ fun PokemonListScreen(
                     viewModel.onClickSearch()
                 }
             )
-            when (searchFilter) {
-                HomeViewModel.SearchingFilter.NAME -> {
-                    Text(text = stringResource(id = R.string.search_name))
-                }
-                HomeViewModel.SearchingFilter.ABILITY -> {
-                    Text(text = stringResource(id = R.string.search_ability))
-                }
-                HomeViewModel.SearchingFilter.UNDEFINED -> {
-                    Text(text = "")
-                }
-            }
+            FilterCheckBox()
             PokemonSection(
                 pokemon = pokemon, modifier = Modifier
                     .padding(24.dp)
@@ -96,9 +87,10 @@ fun PokemonSection(
 
 ) {
     val listAbs = viewModel.listAbilty.collectAsState()
-    val isLoading by remember {
-        viewModel.isLoading
-    }
+    var searchFilter by remember { viewModel.searchFilter }
+    var ability by remember { viewModel.abilty }
+    var isLoading by remember { viewModel.isLoading }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -114,50 +106,112 @@ fun PokemonSection(
                 .crossfade(500)
                 .build()
         )
-        if (pokemon.imgUrl.isEmpty()) {
+        if (isLoading) {
             Image(
                 painter = painterResource(id = R.drawable.ic_vector_pokeball),
                 contentDescription = "placeholder",
                 modifier = Modifier.fillMaxSize(0.5f)
             )
-        } else {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = pokemon.name.uppercase(),
-                    fontSize = 24.sp
-                )
-                Text(
-                    text = pokemon.type.capitalize(Locale.getDefault()),
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Image(
-                    painter = painter,
-                    contentDescription = pokemon.name,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth(0.5f)
-                )
+        }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
+        when (searchFilter) {
+            HomeViewModel.SearchingFilter.NAME -> {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = CenterHorizontally
                 ) {
-                    itemsIndexed(listAbs.value) { _, item ->
-                        DescriptionPokemon(
-                            ability = item,
-                            modifier = Modifier.padding(16.dp, 8.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = pokemon.name.uppercase(),
+                        fontSize = 24.sp
+                    )
+                    Text(
+                        text = pokemon.type.capitalize(Locale.getDefault()),
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Image(
+                        painter = painter,
+                        contentDescription = pokemon.name,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxWidth(0.5f)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        itemsIndexed(listAbs.value) { _, item ->
+                            DescriptionPokemon(
+                                ability = item,
+                                modifier = Modifier.padding(16.dp, 8.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+            HomeViewModel.SearchingFilter.ABILITY -> {
+                if (ability.name.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = ability.name.uppercase(),
+                            fontSize = 24.sp
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        val list =
+                            listOf(
+                                "Short Effect" to ability.shortEffect,
+                                "Effect" to ability.effect
+                            )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            itemsIndexed(list) { _, item ->
+                                DescriptionAbility(
+                                    ability = item,
+                                    modifier = Modifier.padding(16.dp, 8.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
+
+@Composable
+fun DescriptionAbility(
+    ability: Pair<String, String>,
+    modifier: Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = CenterHorizontally,
+    ) {
+        Text(
+            text = ability.first,
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 12.sp,
+            color = Color.Gray
+        )
+        Text(
+            text = ability.second,
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
 
 @Composable
 fun DescriptionPokemon(

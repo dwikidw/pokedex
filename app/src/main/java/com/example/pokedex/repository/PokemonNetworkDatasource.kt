@@ -43,7 +43,7 @@ class PokemonNetworkDatasource @Inject constructor(private val api: PokemonApi) 
         )
     }
 
-    private suspend fun getPokemonAbility(ability: String): PokemonAbilty {
+    suspend fun getPokemonAbility(ability: String): PokemonAbilty {
         val response = try {
             api.getPokemonAbility(ability)
         } catch (e: Exception) {
